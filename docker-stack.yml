@@ -1,16 +1,14 @@
 version: "3.8"
 
 services:
-  ssh:
+  vibecoding-v1:
     image: quay.io/toolbx-images/debian-toolbox:12
     entrypoint: ["/entrypoint.sh"]
     volumes:
       - ./entrypoint.sh:/entrypoint.sh:ro
-    ports:
-      - target: 22
-        published: 2222
-        protocol: tcp
-        mode: host
+      - vibecoding-v1-data:/data
+    networks:
+      - common-overlay
     deploy:
       replicas: 1
       restart_policy:
@@ -18,3 +16,11 @@ services:
       placement:
         constraints:
           - node.role == manager
+
+networks:
+  common-overlay:
+    external: true
+
+volumes:
+  vibecoding-v1-data:
+    name: vibecoding-v1-data
