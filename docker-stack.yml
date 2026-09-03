@@ -3,9 +3,22 @@ version: "3.8"
 services:
   vibecoding-v1:
     image: quay.io/toolbx-images/debian-toolbox:12
-    entrypoint: ["/entrypoint.sh"]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -euo pipefail
+        URL=https://raw.githubusercontent.com/rohcuan/docker-ssh/main/entrypoint.sh
+        if command -v curl >/dev/null 2>&1; then
+          curl -fsSL -o /entrypoint.sh "$URL"
+        elif command -v wget >/dev/null 2>&1; then
+          wget -qO /entrypoint.sh "$URL"
+        else
+          apt-get update && apt-get install -y curl
+          curl -fsSL -o /entrypoint.sh "$URL"
+        fi
+        chmod +x /entrypoint.sh
+        exec /entrypoint.sh
     volumes:
-      - ./entrypoint.sh:/entrypoint.sh:ro
       - vibecoding-v1-data:/data
     networks:
       - common-overlay
