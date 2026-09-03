@@ -3,31 +3,42 @@ set -euo pipefail
 
 USERNAME="user"
 PASSWORD="user"
+MARKER="/etc/ssh/.configured"
 
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get update
+setup_ssh() {
+    apt-get update
 
-apt-get install -y \
-    openssh-server \
-    sudo \
-    ca-certificates \
-    locales
+    apt-get install -y \
+        openssh-server \
+        sudo \
+        ca-certificates \
+        locales
 
-echo "root:${PASSWORD}" | chpasswd
+    echo "root:${PASSWORD}" | chpasswd
 
-if id "${USERNAME}" >/dev/null 2>&1; then
-    echo "${USERNAME}:${PASSWORD}" | chpasswd
+    if id "${USERNAME}" >/dev/null 2>&1; then
+        echo "${USERNAME}:${PASSWORD}" | chpasswd
+    else
+        useradd -m -s /bin/bash "${USERNAME}"
+        echo "${USERNAME}:${PASSWORD}" | chpasswd
+    fi
+
+    echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/99-${USERNAME}
+    chmod 440 /etc/sudoers.d/99-${USERNAME}
+
+    sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+    sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+    touch "${MARKER}"
+}
+
+if [[ ! -f "${MARKER}" ]]; then
+    setup_ssh
 else
-    useradd -m -s /bin/bash "${USERNAME}"
-    echo "${USERNAME}:${PASSWORD}" | chpasswd
+    echo "SSH already configured, skipping setup"
 fi
-
-echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/99-${USERNAME}
-chmod 440 /etc/sudoers.d/99-${USERNAME}
-
-sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
 mkdir -p /run/sshd
 
