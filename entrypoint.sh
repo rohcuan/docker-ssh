@@ -19,11 +19,11 @@ setup_ssh() {
     echo "root:${PASSWORD}" | chpasswd
 
     if id "${USERNAME}" >/dev/null 2>&1; then
-        echo "${USERNAME}:${PASSWORD}" | chpasswd
+        :
     else
         useradd -m -s /bin/bash "${USERNAME}"
-        echo "${USERNAME}:${PASSWORD}" | chpasswd
     fi
+    echo "${USERNAME}:${PASSWORD}" | chpasswd
 
     echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/99-${USERNAME}
     chmod 440 /etc/sudoers.d/99-${USERNAME}
