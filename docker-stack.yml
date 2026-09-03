@@ -15,7 +15,7 @@ services:
         condition: any
       placement:
         constraints:
-          - node.role == manager
+          - node.hostname == stb1
 
 networks:
   common-overlay:
