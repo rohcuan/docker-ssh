@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   vibecoding-v1:
-    image: quay.io/toolbx-images/debian-toolbox:12
+    image: debian:12
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
